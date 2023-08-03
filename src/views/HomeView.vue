@@ -5,16 +5,16 @@
       <label>
         Artist
         <br>
-        <select v-model="artist" name="artist" id="pet-select">
-          <option  value="nope">All Artists</option>
+        <select @change="filter" v-model="artist" name="artist" id="pet-select">
+          <option  value="null">All Artists</option>
           <option v-for="(artist, index) in artists" :value="artist" :key="index">{{artist}}</option>
         </select>
       </label>
       <label>
         Location
         <br>
-        <select  v-model="location" name="artist" id="pet-select">
-          <option value="nope">All Locations</option>
+        <select @change="filter" v-model="location" name="artist" id="pet-select">
+          <option value="null">All Locations</option>
           <option v-for="(location, index) in locations" :value="location" :key="index">{{location}}</option>
         </select>
       </label>
@@ -23,11 +23,12 @@
         <br>
         <input type="date" placeholder="Select date">
       </label>
+      <button @click="clear()" v-if="artist !== 'null' || location !== 'null'">Clear</button>
     </section>
 
     <section class="cards">
       <div v-for="(concert, index) in concerts" :key="index">
-        <div @click="selectConcert(concert)" class="card" :class="{'disabled': concert.artist === artist || concert.location.name === location}">
+        <div @click="selectConcert(concert)" class="card" v-show="concert.enabled">
           <h2>{{ concert.artist }}</h2>
           <p>{{ concert.location.name }}</p>
           <br>
@@ -50,23 +51,43 @@ export default {
   data () {
     return {
       concerts: [],
+      table: [],
       artists: [],
       locations: [],
-      artist: "nope",
-      location: "nope"
+      artist: 'null',
+      location: 'null'
     }
   },
   mounted () {
     // Get concerts
     this.axios.get('/concerts').then((response) => {
       this.concerts = response.data.concerts
-      this.concerts.map((concert) => {
+      this.concerts.map((concert, index) => {
+        this.concerts[index].enabled = true
         this.artists.push(concert.artist)
         this.locations.push(concert.location.name)
       })
+      this.table = this.concerts
     })
   },
   methods: {
+    clear () {
+      this.artist =  'null'
+      this.location =  'null'
+      this.filter()
+    },
+    filter () {
+      this.concerts.map((concert, index) => {
+        if((this.artist !== 'null' && concert.artist !== this.artist) ||
+          (this.location !== 'null' && concert.location.name !== this.location)
+        ) {
+          this.concerts[index].enabled = false
+        }
+        if(this.artist === 'null' && this.location === 'null'){
+          this.concerts[index].enabled = true
+        }
+      })
+    },
     selectConcert (concert) {
       localStorage.setItem('concert', JSON.stringify(concert))
       this.$router.push('/booking')
@@ -95,13 +116,14 @@ export default {
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 70px;
+    height: 100%;
 }
 
 .card {
     border: 1px solid gray;
     padding: 16px;
     border-radius: 10px;
-    max-width: 200px;
+    max-width: 250px;
     width: 100%;
     cursor: pointer;
 }

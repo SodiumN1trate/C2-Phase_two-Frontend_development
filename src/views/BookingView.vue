@@ -2,7 +2,7 @@
   <main>
     <page-title title="Book seats for your show" />
 
-
+    <!--  Concert card  -->
     <div class="card" v-if="concert">
       <h2>{{ concert.artist }}</h2>
       <p>{{ concert.location.name }}</p>
@@ -14,6 +14,7 @@
       </div>
     </div>
 
+<!--    Selected seats-->
     <section class="selected-seats">
       <h1>Selected seats</h1>
       <template v-if="selectedSeats.length > 0">
@@ -23,7 +24,9 @@
       <p v-else>No seats selected. Click on seat to make a reservation.</p>
     </section>
 
+
     <div v-show="!details">
+<!--      Stage map-->
       <section class="stage">
         <h1>Stage</h1>
       </section>
@@ -37,6 +40,7 @@
       </section>
     </div>
     <div v-show="details">
+<!--  Booking form -->
       <section class="details">
         <h1>Please enter your details</h1>
       </section>
